@@ -41,13 +41,13 @@ class AmazonSpider(scrapy.Spider):
         title = response.xpath('//span[@id="title"]/text()').extract_first()
         # 产品图片地址
         image_url = response.xpath(
-            '//img[@data-fling-refmarker="detail_main_image_block"]/@data-midres-replacement').extract_first()
+            '//img[@data-fling-refmarker="detail_main_image_block"]/@data-midres-replacement').extract_first()  # noqa: E501
         # 商品唯一标识
         asin = response.xpath(
             '//div[@id="cerberus-data-metrics"]/@data-asin').extract_first()
         # 价格
         price = response.xpath(
-            '//div[@id="cerberus-data-metrics"]/@data-asin-price').extract_first()
+            '//div[@id="cerberus-data-metrics"]/@data-asin-price').extract_first()  # noqa: E501
         # 描述
         description = response.xpath(
             '//*[@id="productDescription_fullView"]').extract_first()
@@ -56,7 +56,8 @@ class AmazonSpider(scrapy.Spider):
             description = BeautifulSoup(description).get_text()
         # 特征
         features = response.xpath(
-            '//div[@id="feature-bullets"]//span[@class="a-list-item"]/text()').extract()
+            '//div[@id="feature-bullets"]//span[@class="a-list-item"]/text()')\
+            .extract()
 
         # 如果没有评论也没有获取到产品特征，那就不要这条数据
         if not description and not features:
@@ -71,7 +72,10 @@ class AmazonSpider(scrapy.Spider):
         item['description'] = description
         item['features'] = features
 
-        comments_url = 'https://www.amazon.com/kinery-Concentrator-Generator-Adjustable-Humidifiers/product-reviews/%s/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=five_star&pageNumber=1' % asin
+        comments_url = 'https://www.amazon.com/kinery-Concentrator-Generator' \
+                       '-Adjustable-Humidifiers/product-reviews/%s/ref=cm_cr' \
+                       '_unknown?ie=UTF8&reviewerType=all_reviews&filterBy' \
+                       'Star=five_star&pageNumber=1' % asin
         yield scrapy.Request(
             url=comments_url, callback=self._get_good_comments,
             meta={"item": item})
@@ -87,8 +91,10 @@ class AmazonSpider(scrapy.Spider):
         item["review_good_titles"] = review_titles
         item["review_good_contents"] = review_contents
 
-        comments_url = 'https://www.amazon.com/kinery-Concentrator-Generator-Adjustable-Humidifiers/product-reviews/%s/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=one_star&pageNumber=1' % item.get(
-            'asin')
+        comments_url = 'https://www.amazon.com/kinery-Concentrator-' \
+                       'Generator-Adjustable-Humidifiers/product-reviews/%s' \
+                       '/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews' \
+                       '&filterByStar=one_star&pageNumber=1' % item.get('asin')
         yield scrapy.Request(
             url=comments_url, callback=self._get_bad_comments,
             meta={"item": item})
