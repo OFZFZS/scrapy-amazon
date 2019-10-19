@@ -1,0 +1,4 @@
+beautifulsoup4==4.8.1
+lxml==4.4.1
+pymongo==3.9.0
+Scrapy==1.7.3
