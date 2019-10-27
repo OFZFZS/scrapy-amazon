@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
+import requests
 
 from Amazon.items import AmazonItem
 from Amazon.settings import DEFAULT_REQUEST_HEADERS
@@ -16,7 +17,10 @@ class AmazonSpider(scrapy.Spider):
     page = 1
     keyword = 'oxygen+concentrator'
     start_urls = [
-        'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)]
+        'https://www.amazon.com/s?k=' + keyword + '&page=' + str(
+            page)+'&rh=n%3A3760901',
+        'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)+'&rh=n%3A1055398'
+    ]
 
     def parse(self, response):
         url_list = response.xpath('//a[@title="status-badge"]/@href').extract()
@@ -24,7 +28,8 @@ class AmazonSpider(scrapy.Spider):
 
         product_url_list = [BASE_URL + x for x in url_list]
         # 判断是否是最后一页，是最后一页则结束
-        if not last or self.page > 1:
+
+        if not last:
             return
 
         for product_url in product_url_list:
@@ -39,6 +44,10 @@ class AmazonSpider(scrapy.Spider):
 
     def _get_product_details(self, response):
         title = response.xpath('//span[@id="title"]/text()').extract_first()
+        if not title:
+            print('您的IP已被亚马逊限制,请更换IP后重试')
+            return
+        title = title.replace('\n', '')
         # 产品图片地址
         image_url = response.xpath(
             '//img[@data-fling-refmarker="detail_main_image_block"]/@data-midres-replacement').extract_first()  # noqa: E501
@@ -56,7 +65,7 @@ class AmazonSpider(scrapy.Spider):
             description = BeautifulSoup(description).get_text()
         # 特征
         features = response.xpath(
-            '//div[@id="feature-bullets"]//span[@class="a-list-item"]/text()')\
+            '//div[@id="feature-bullets"]//span[@class="a-list-item"]/text()') \
             .extract()
 
         # 如果没有评论也没有获取到产品特征，那就不要这条数据
@@ -72,6 +81,12 @@ class AmazonSpider(scrapy.Spider):
         item['description'] = description
         item['features'] = features
 
+        # 保存图片
+        try:
+            self.save_image(image_url, asin)
+        except Exception:
+            pass
+
         comments_url = 'https://www.amazon.com/kinery-Concentrator-Generator' \
                        '-Adjustable-Humidifiers/product-reviews/%s/ref=cm_cr' \
                        '_unknown?ie=UTF8&reviewerType=all_reviews&filterBy' \
@@ -79,6 +94,16 @@ class AmazonSpider(scrapy.Spider):
         yield scrapy.Request(
             url=comments_url, callback=self._get_good_comments,
             meta={"item": item})
+
+    def save_image(self, img_url, img_name):
+        response = requests.get(img_url)
+        # 获取的文本实际上是图片的二进制文本
+        img = response.content
+        # 将他拷贝到本地文件 w 写  b 二进制  wb代表写入二进制文本
+        # 保存路径
+        path = '../images/%s.jpg' % (img_name)
+        with open(path, 'wb') as f:
+            f.write(img)
 
     def _get_good_comments(self, response):
         """获取商品好评:只取一页五星好评"""

@@ -18,5 +18,12 @@ class AmazonGoodsPipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, AmazonItem):
-            self.client.insert(dict(item))
+            _item = dict(item)
+            _item['_id'] = _item['asin']
+            try:
+                # asin作为主键,插入重复会报错
+                self.client.insert(_item)
+            except Exception as err:
+                pass
+
         return item
