@@ -5,15 +5,13 @@ BOT_NAME = 'Amazon'
 SPIDER_MODULES = ['Amazon.spiders']
 NEWSPIDER_MODULE = 'Amazon.spiders'
 
-USER_AGENT = "Mozilla/5.0 (Linux; U; Android 4.1.1; zh-cn;  MI2 Build/JRO03L" \
-             ") AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Sa" \
-             "fari/534.30 XiaoMi/MiuiBrowser/1.0"
+USER_AGENT = "Mozilla/5.0 (Linux; U; Android 8.1.0; zh-cn; BLA-AL00 Build/HUAWEIBLA-AL00) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/8.9 Mobile Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -73,3 +71,6 @@ ITEM_PIPELINES = {
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
+
+COOKIES = {'session-id-time': '2082787201l', 'i18n-prefs': 'USD',
+           'session-id': '142-9723185-7096359', 'csm-hit': 'tb:s-TBNBSGGG2DTDACWFT2JG|1572104186431&t:1572104193942&adb:adblk_yes', 'sp-cdn': '"L5Z9:CN"', 'session-token': 'NtXSk4TNeLL1ywfKV+TvuhmxatgSa0yrUMVDxOzt0g6CAMeI6LkpgnQrcoU1asoE+pKF7ldrZnErq1dycNPGtszkRh03Wmo07Omhxs4OsROir2zQn4T5AtJAkn+RqVL8XB6izSJHsI0OWrp6to8bsr9AAw/4tLCFpEsnIh7nzYE0aDnZRQdyKCRbZbIxQTZg42jrFYHQH21c0ePPk9d0oC3feWEYOqh5KmCr5RWv8+xnCTX7kqpCELI9Qbsz1VKR', 'ubid-main': '135-5055030-7258235', 'x-wl-uid': '1iBt/JjYEoFYF+hGe2aCjWjyE0SGZ8B4QyX2KaTJl47LFamTRWYPbh4mcm/D2kLypor/oEsLBxqI', 'lc-main': 'zh_CN'}
