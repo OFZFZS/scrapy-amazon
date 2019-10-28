@@ -15,11 +15,12 @@ class AmazonSpider(scrapy.Spider):
     name = 'amazon'
     allowed_domains = ['amazon.com']
     page = 1
-    keyword = 'oxygen+concentrator'
+    keyword = 'Erhu'
+    rh = 'n%3A11091801'
     start_urls = [
         'https://www.amazon.com/s?k=' + keyword + '&page=' + str(
-            page)+'&rh=n%3A3760901',
-        'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)+'&rh=n%3A1055398'
+            page)+'&rh=' + rh,
+        # 'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)+'&rh=n%3A1055398'
     ]
 
     def parse(self, response):
@@ -29,7 +30,7 @@ class AmazonSpider(scrapy.Spider):
         product_url_list = [BASE_URL + x for x in url_list]
         # 判断是否是最后一页，是最后一页则结束
 
-        if not last:
+        if not last or self.page >= 5:
             return
 
         for product_url in product_url_list:
@@ -38,8 +39,9 @@ class AmazonSpider(scrapy.Spider):
                                  headers=DEFAULT_REQUEST_HEADERS)
         self.page += 1
         yield scrapy.Request(
-            url='https://www.amazon.com/s?k=oxygen+concentrator&page=' + str(
-                self.page) + '&ref=is_pn_' + str(self.page - 1),
+            url='https://www.amazon.com/s?k='+ self.keyword +'&page=' + str(
+                self.page)+'&rh=' + self.rh + '&ref=is_pn_' + str(self.page -
+                                                                 1),
             callback=self.parse)
 
     def _get_product_details(self, response):

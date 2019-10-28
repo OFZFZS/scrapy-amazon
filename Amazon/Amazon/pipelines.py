@@ -14,7 +14,7 @@ class AmazonGoodsPipeline(object):
 
     def open_spider(self, spider):
         self.db = MongoClient(host="127.0.0.1", port=27017)
-        self.client = self.db.Amazon.amazon
+        self.client = self.db.Amazon.erhu
 
     def process_item(self, item, spider):
         if isinstance(item, AmazonItem):
