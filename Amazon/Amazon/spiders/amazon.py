@@ -15,13 +15,52 @@ class AmazonSpider(scrapy.Spider):
     name = 'amazon'
     allowed_domains = ['amazon.com']
     page = 1
-    keyword = 'Erhu'
+    temp = 1
+    keyword = 'dizi'
     rh = 'n%3A11091801'
-    start_urls = [
-        'https://www.amazon.com/s?k=' + keyword + '&page=' + str(
-            page)+'&rh=' + rh,
-        # 'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)+'&rh=n%3A1055398'
-    ]
+    cookies = {
+        "anonymid": "j7wsz80ibwp8x3",
+        "_r01_": "1",
+        "ln_uact": "mr_mao_hacker@163.com",
+        "_de": "BF09EE3A28DED52E6B65F6A4705D973F1383380866D39FF5",
+        "depovince": "GW",
+        "jebecookies": "2fb888d1-e16c-4e95-9e59-66e4a6ce1eae|||||",
+        "ick_login": "1c2c11f1-50ce-4f8c-83ef-c1e03ae47add",
+        "p": "158304820d08f48402be01f0545f406d9",
+        "first_login_flag": "1",
+        "ln_hurl": "http://hdn.xnimg.cn/photos/hdn521/20180711/2125/main_SDYi_ae9c0000bf9e1986.jpg",
+        "t": "adb2270257904fff59f082494aa7f27b9",
+        "societyguester": "adb2270257904fff59f082494aa7f27b9",
+        "id": "327550029",
+        "xnsid": "4a536121",
+        "loginfrom": "syshome",
+        "wp_fold": "0"
+    }
+
+    headers = {
+        'Host': 'www.amazon.com',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 7.0; \
+                        SM-A520F Build/NRD90M; wv) AppleWebKit/537.36 \
+                        (KHTML, like Gecko) Version/4.0 \
+                        Chrome/65.0.3325.109 Mobile Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,\
+                        application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    }
+
+    def start_requests(self):
+        """
+            start_requests做为程序的入口，可以重写，自定义第一批请求
+            可以添加headers、cookies, , dont_filter=True
+        """
+        start_urls = [
+            'https://www.amazon.com/s?k=' + self.keyword + '&page=' + str(
+                self.page) + '&rh=' + self.rh,
+            # 'https://www.amazon.com/s?k=' + keyword + '&page=' + str(page)+'&rh=n%3A1055398'
+        ]
+
+        for url in start_urls:
+            yield scrapy.Request(url, headers=self.headers,
+                                 callback=self.parse)
 
     def parse(self, response):
         url_list = response.xpath('//a[@title="status-badge"]/@href').extract()
@@ -31,6 +70,7 @@ class AmazonSpider(scrapy.Spider):
         # 判断是否是最后一页，是最后一页则结束
 
         if not last or self.page >= 5:
+            print('翻页结束,当前页:%s 没有描述特征:%s' % (self.page, self.temp))
             return
 
         for product_url in product_url_list:
@@ -39,9 +79,9 @@ class AmazonSpider(scrapy.Spider):
                                  headers=DEFAULT_REQUEST_HEADERS)
         self.page += 1
         yield scrapy.Request(
-            url='https://www.amazon.com/s?k='+ self.keyword +'&page=' + str(
-                self.page)+'&rh=' + self.rh + '&ref=is_pn_' + str(self.page -
-                                                                 1),
+            url='https://www.amazon.com/s?k=' + self.keyword + '&page=' + str(
+                self.page) + '&rh=' + self.rh + '&ref=is_pn_' + str(self.page -
+                                                                    1),
             callback=self.parse)
 
     def _get_product_details(self, response):
@@ -72,6 +112,8 @@ class AmazonSpider(scrapy.Spider):
 
         # 如果没有评论也没有获取到产品特征，那就不要这条数据
         if not description and not features:
+            self.temp += 1
+            print('没有描述也没有特征,结束..,总共已过滤%s个' % self.temp)
             return
 
         item = AmazonItem()

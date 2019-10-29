@@ -62,3 +62,14 @@ class RandomUserAgent(object):
 
     def process_request(self, request, spider):
         request.headers['User-Agent'] = USER_AGENT
+
+
+class RandomProxyMiddleware(object):
+    """设置代理访问"""
+    # Not all methods need to be defined. If a method is not defined,
+    # scrapy acts as if the downloader middleware does not modify the
+    # passed objects.
+
+    def process_request(self, request, spider):
+        # request.meta['proxy'] ="http://115.28.141.184:16816"
+        request.meta['proxy'] = "http://maozhaojun:ntkn0npx@115.28.141.184:16816"

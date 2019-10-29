@@ -39,6 +39,7 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
 #    'Amazon.middlewares.AmazonSpiderMiddleware': 543,
+#    'Amazon.middlewares.RandomUserAgentMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
