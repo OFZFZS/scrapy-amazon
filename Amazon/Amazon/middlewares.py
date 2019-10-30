@@ -71,5 +71,4 @@ class RandomProxyMiddleware(object):
     # passed objects.
 
     def process_request(self, request, spider):
-        # request.meta['proxy'] ="http://115.28.141.184:16816"
-        request.meta['proxy'] = "http://maozhaojun:ntkn0npx@115.28.141.184:16816"
+        request.meta['proxy'] ="http://10.122.141.184:16816"

@@ -15,8 +15,8 @@ class AmazonSpider(scrapy.Spider):
     name = 'amazon'
     allowed_domains = ['amazon.com']
     page = 1
-    temp = 1
-    keyword = 'dizi'
+    lost_item = 0
+    keyword = 'Pipa'
     rh = 'n%3A11091801'
     cookies = {
         "anonymid": "j7wsz80ibwp8x3",
@@ -70,7 +70,7 @@ class AmazonSpider(scrapy.Spider):
         # 判断是否是最后一页，是最后一页则结束
 
         if not last or self.page >= 5:
-            print('翻页结束,当前页:%s 没有描述特征:%s' % (self.page, self.temp))
+            print('翻页结束,当前页:%s 没有描述特征商品数:%s' % (self.page, self.lost_item))
             return
 
         for product_url in product_url_list:
@@ -85,6 +85,11 @@ class AmazonSpider(scrapy.Spider):
             callback=self.parse)
 
     def _get_product_details(self, response):
+        # 处理亚马逊的反爬文本,释放注释代码
+        res_body = response.text
+        _res = res_body.replace('<!--rbd-->', '').replace('<!-->', '')
+        response = response.replace(body=_res)
+
         title = response.xpath('//span[@id="title"]/text()').extract_first()
         if not title:
             print('您的IP已被亚马逊限制,请更换IP后重试')
@@ -112,8 +117,8 @@ class AmazonSpider(scrapy.Spider):
 
         # 如果没有评论也没有获取到产品特征，那就不要这条数据
         if not description and not features:
-            self.temp += 1
-            print('没有描述也没有特征,结束..,总共已过滤%s个' % self.temp)
+            self.lost_item += 1
+            print('没有描述也没有特征,结束..,总共已过滤%s个' % self.lost_item)
             return
 
         item = AmazonItem()
@@ -129,7 +134,7 @@ class AmazonSpider(scrapy.Spider):
         try:
             self.save_image(image_url, asin)
         except Exception:
-            pass
+            print('图片下载保存失败..')
 
         comments_url = 'https://www.amazon.com/kinery-Concentrator-Generator' \
                        '-Adjustable-Humidifiers/product-reviews/%s/ref=cm_cr' \
